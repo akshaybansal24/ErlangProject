@@ -1,0 +1,19 @@
+
+public class Messaging extends Thread 
+{
+	String name;
+	
+	public Messaging(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public void run() {
+		try {
+			this.wait(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}

@@ -1,0 +1,74 @@
+import java.util.ArrayList;
+
+public class PersonDataReceive extends Thread {
+	private Object childLock = new Object();
+	private boolean flag = false;
+	String personName;
+	String threadName;
+	ArrayList<String> receiverList;
+	String messageForMaster = "%s received %s message from %s [%s]";
+	public String getPersonName() {
+		return personName;
+	}
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
+	public ArrayList<String> getReceiverList() {
+		return receiverList;
+	}
+	public void setReceiverList(ArrayList<String> receiverList) {
+		this.receiverList = receiverList;
+	}
+	
+	public String getThreadName() {
+		return threadName;
+	}
+	public void setThreadName(String threadName) {
+		this.threadName = threadName;
+	}
+	@Override
+	public void run() {
+		if(this.threadName.equalsIgnoreCase("send")) {
+			System.out.println("Send  : " +this.personName+ " : " + this.getId());
+			synchronized (this) {
+				this.sendMessage();
+			}
+		}
+		else{
+			System.out.println("Receive  : " +this.personName+ " : " + this.getId());
+			try {
+				synchronized (this) {
+					while(true) {
+						this.wait(1000L);
+						synchronized (childLock) {
+							if(!this.flag)
+								break;
+							else
+								flag = false;
+						}
+					}
+				}
+				
+				System.out.println("Child Process ends : " + this.personName);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void sendMessage() {
+		for(String receiver : receiverList) {
+			exchange.childThreadListReceive.get(receiver).notify();
+			exchange.childThreadListReceive.get(receiver).receiveMessage(receiver, this.personName, "intro", System.currentTimeMillis());;
+		}
+	}
+	public void receiveMessage(String receiver,String sender, String type, long timestamp) {
+		String messageToPrint = String.format(messageForMaster, receiver,sender,type,Long.toString(timestamp));
+		synchronized (exchange.lock) {
+			exchange.messageToPrint = messageToPrint;
+			exchange.masterThread.notify();
+		}
+		exchange.childThreadListReceive.get(sender).notify();
+		exchange.childThreadListReceive.get(sender).receiveMessage(sender, receiver, "reply", timestamp);
+	}
+}

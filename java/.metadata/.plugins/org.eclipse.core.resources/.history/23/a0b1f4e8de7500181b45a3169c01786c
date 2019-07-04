@@ -1,0 +1,8 @@
+
+public class Messaging extends Thread 
+{
+	@Override
+	public void run() {
+		
+	}
+}

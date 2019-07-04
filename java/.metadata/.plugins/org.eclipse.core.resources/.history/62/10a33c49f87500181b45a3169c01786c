@@ -1,0 +1,71 @@
+import java.util.ArrayList;
+
+public class PersonDataReceive extends Thread {
+	public Object childLock = new Object();
+	public Object childLockThread = new Object();
+	public boolean flag = false;
+	String personName;
+	String threadName;
+	ArrayList<String> receiverList;
+	String messageForMaster = "%s received %s message from %s [%s]";
+	public String getPersonName() {
+		return personName;
+	}
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
+	public ArrayList<String> getReceiverList() {
+		return receiverList;
+	}
+	public void setReceiverList(ArrayList<String> receiverList) {
+		this.receiverList = receiverList;
+	}
+	
+	public String getThreadName() {
+		return threadName;
+	}
+	public void setThreadName(String threadName) {
+		this.threadName = threadName;
+	}
+	@Override
+	public void run() {
+		System.out.println("Receive  : " +this.personName+ " : " + this.getId());
+		try {
+			synchronized (this) {
+				while(true) {
+					this.wait(1000L);
+					synchronized (childLock) {
+						if(!this.flag)
+							break;
+						else
+							flag = false;
+					}
+				}
+			}
+			
+			System.out.println("Child Process ends : " + this.personName);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receiveMessage(String receiver,String type, String sender, long timestamp) {
+		String messageToPrint = String.format(messageForMaster, receiver,sender,type,Long.toString(timestamp));
+		synchronized (exchange.masterThread) {
+			synchronized (exchange.lock) {
+				exchange.messageToPrint = messageToPrint;
+				exchange.masterThread.notify();
+			}
+		}
+		if(type.equalsIgnoreCase("intro")) {
+			synchronized (exchange.childThreadListReceive.get(sender)) {
+				synchronized (exchange.childThreadListReceive.get(sender).childLock) {
+					exchange.childThreadListReceive.get(sender).flag = true;
+				}
+				exchange.childThreadListReceive.get(sender).notify();
+				exchange.childThreadListReceive.get(sender).receiveMessage(sender, "reply",receiver, timestamp);
+			}
+		}
+		
+	}
+}

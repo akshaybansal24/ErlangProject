@@ -1,0 +1,48 @@
+import java.util.ArrayList;
+
+public class Person extends Thread{
+	String personName;
+	ArrayList<String> receiverList;
+	public String getPersonName() {
+		return personName;
+	}
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
+	public ArrayList<String> getReceiverList() {
+		return receiverList;
+	}
+	public void setReceiverList(ArrayList<String> receiverList) {
+		this.receiverList = receiverList;
+	}
+	
+	@Override
+	public void run() {
+		for(String receiver : receiverList) {
+			try {
+				Thread.sleep(100L);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Person receiverObject = exchange.personMap.get(receiver);
+			receiverObject.receiveMessage(receiver, this.getName(), "intro", Long.toString(System.currentTimeMillis()));
+		}
+		Thread.sleep(1000);
+	}
+	
+	public void receiveMessage(String receiver,String sender,String type, String timestamp) {
+		exchange.masterThread.printMessage(String.format("% received % message from % [%]", receiver,type,sender,timestamp));
+		if(type.equalsIgnoreCase("intro")) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Person receiverObject = exchange.personMap.get(sender);
+			receiverObject.receiveMessage(sender, receiver, "reply", timestamp);
+		}
+	}
+	
+}

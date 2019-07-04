@@ -1,0 +1,46 @@
+import java.util.ArrayList;
+
+public class PersonData extends Thread {
+	static int count = 0;
+	String personName;
+	ArrayList<String> receiverList;
+	String messageForMaster = "%s received %s message from %s [%s]";
+	public String getPersonName() {
+		return personName;
+	}
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
+	public ArrayList<String> getReceiverList() {
+		return receiverList;
+	}
+	public void setReceiverList(ArrayList<String> receiverList) {
+		this.receiverList = receiverList;
+	}
+	
+	@Override
+	public void run() {
+		this.sendMessage();
+		System.out.println("count : " + count);
+	}
+	
+	synchronized public void sendMessage() {
+		for(String receiver : receiverList) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			synchronized (exchange.childThreadListReceive.get(receiver)) {
+				synchronized (exchange.childThreadListReceive.get(receiver).childLock) {
+					exchange.childThreadListReceive.get(receiver).flag = true;
+				}
+				count = count +1;
+				exchange.childThreadListReceive.get(receiver).notify();
+				exchange.childThreadListReceive.get(receiver).receiveMessage(receiver, "intro",this.personName, System.currentTimeMillis());
+			}
+			
+		}
+	}
+}

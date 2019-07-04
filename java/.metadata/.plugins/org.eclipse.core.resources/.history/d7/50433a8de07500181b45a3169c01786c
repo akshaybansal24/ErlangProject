@@ -1,0 +1,14 @@
+
+public class Messaging extends Thread 
+{
+	String name;
+	
+	public Messaging(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public void run() {
+		
+	}
+}

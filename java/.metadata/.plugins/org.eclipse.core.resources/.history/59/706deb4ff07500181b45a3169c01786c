@@ -1,0 +1,51 @@
+import java.util.ArrayList;
+
+public class PersonData extends Thread {
+	private Object childLock = new Object();
+	private 
+	String personName;
+	String threadName;
+	ArrayList<String> receiverList;
+	String messageForMaster = "%s received %s message from %s [%s]";
+	public String getPersonName() {
+		return personName;
+	}
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
+	public ArrayList<String> getReceiverList() {
+		return receiverList;
+	}
+	public void setReceiverList(ArrayList<String> receiverList) {
+		this.receiverList = receiverList;
+	}
+	
+	public String getThreadName() {
+		return threadName;
+	}
+	public void setThreadName(String threadName) {
+		this.threadName = threadName;
+	}
+	@Override
+	public void run() {
+		if(this.threadName.equalsIgnoreCase("send")) {
+			this.sendMessage();
+		}
+		else{
+			try {
+				while(true) {
+					this.wait(1000L);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void sendMessage() {
+		
+	}
+	public void receiveMessage(String receiver,String sender, String type, long timestamp) {
+		
+	}
+}

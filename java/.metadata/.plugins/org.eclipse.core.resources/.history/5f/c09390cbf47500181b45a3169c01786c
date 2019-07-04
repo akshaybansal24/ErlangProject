@@ -1,0 +1,31 @@
+import java.util.ArrayList;
+
+public class PersonData extends Thread {
+	String personName;
+	ArrayList<String> receiverList;
+	String messageForMaster = "%s received %s message from %s [%s]";
+	public String getPersonName() {
+		return personName;
+	}
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
+	public ArrayList<String> getReceiverList() {
+		return receiverList;
+	}
+	public void setReceiverList(ArrayList<String> receiverList) {
+		this.receiverList = receiverList;
+	}
+	
+	@Override
+	public void run() {
+		this.sendMessage();
+	}
+	
+	public void sendMessage() {
+		for(String receiver : receiverList) {
+			exchange.childThreadListReceive.get(receiver).notify();
+			exchange.childThreadListReceive.get(receiver).receiveMessage(receiver, this.personName, "intro", System.currentTimeMillis());;
+		}
+	}
+}
